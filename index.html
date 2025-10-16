@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Лабиринт M2</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <!-- Главный старт -->
+  <div id="startOverlay" class="overlay">
+    <h1>Лабиринт</h1>
+    <div class="footer-info">Разработчик: Andrei Pabiarzhyn • FunTech Projects</div>
+    <button id="startButton">Новая игра</button>
+  </div>
+
+  <!-- Старт уровня -->
+  <div id="levelOverlay" class="overlay" style="display:none;">
+    <h1 id="levelTitle">Уровень 1</h1>
+    <p class="sub">У тебя 3 жизни. Удачи!</p>
+    <button id="levelStartButton">Старт</button>
+  </div>
+
+  <!-- Окно поражения (жизни кончились) -->
+  <div id="gameOverOverlay" class="overlay" style="display:none;">
+    <h1>Упс, попробуй ещё раз</h1>
+    <p class="sub" id="lostLevelText">Ты проиграл на уровне 1</p>
+    <button id="gameOverOk">OK</button>
+  </div>
+
+  <!-- Окно финальной победы -->
+  <div id="victoryOverlay" class="overlay" style="display:none;">
+    <h1>Победа!</h1>
+    <img id="victoryImage"
+         src="/assets/win.gif"
+         alt="Победа!">
+    <button id="closeVictory">Закрыть</button>
+  </div>
+
+  <!-- Игра -->
+  <div class="game-container">
+    <div class="hud">
+      <div id="levelBadge">Уровень: 1</div>
+      <div id="scoreDisplay">Очки: 0</div>
+      <div id="lives" class="lives"></div>
+    </div>
+
+    <canvas id="mazeCanvas"></canvas>
+    <div class="footer-info">Разработчик: Andrei Pabiarzhyn • FunTech Projects</div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
