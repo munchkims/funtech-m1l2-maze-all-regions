@@ -46,8 +46,13 @@ export function renderLives(){
 export function show(el){ el.style.display = 'flex'; }
 export function hide(el){ el.style.display = 'none'; }
 
-export function showStartOverlay(){ show(State.dom.startOverlay); }
-export function hideStartOverlay(){ hide(State.dom.startOverlay); }
+export function showStartOverlay(){
+  if (State.dom.startOverlay) show(State.dom.startOverlay);
+}
+
+export function hideStartOverlay(){
+  if (State.dom.startOverlay) hide(State.dom.startOverlay);
+}
 
 export function showLevelOverlay(){ updateHUD(); renderLives(); show(State.dom.levelOverlay); }
 export function hideLevelOverlay(){ hide(State.dom.levelOverlay); }

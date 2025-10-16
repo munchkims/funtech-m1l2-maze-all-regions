@@ -5,10 +5,11 @@ import { attachInput } from './input.js';
 window.addEventListener('load', ()=>{
   initUI();
   attachInput();
-  showStartOverlay();
+
+  // 🔹 сразу запускаем первый уровень
+  newGame();
 
   // Кнопки
-  document.getElementById('startButton').addEventListener('click', ()=> newGame());
   document.getElementById('levelStartButton').addEventListener('click', ()=> beginPlay());
   document.getElementById('gameOverOk').addEventListener('click', ()=> retrySameLevel());
   document.getElementById('closeVictory').addEventListener('click', ()=> closeVictoryAndBackToMenu());

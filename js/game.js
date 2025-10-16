@@ -107,5 +107,9 @@ function checkFinish(){
 
 export function closeVictoryAndBackToMenu(){
   hideVictory();
-  showStartOverlay();
+
+  // 🔹 Запускаем новую игру с первого уровня
+  State.level = 1;
+  State.score = 0;
+  startLevel(true);
 }
