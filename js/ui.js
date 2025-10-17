@@ -1,19 +1,18 @@
 import { State, CONFIG } from './state.js';
 
-export function initUI(){
-  State.dom.startOverlay   = document.getElementById('startOverlay');
-  State.dom.levelOverlay   = document.getElementById('levelOverlay');
-  State.dom.gameOverOverlay= document.getElementById('gameOverOverlay');
-  State.dom.victoryOverlay = document.getElementById('victoryOverlay');
+export function initUI() {
+  State.dom.startOverlay    = document.getElementById('startOverlay');
+  State.dom.levelOverlay    = document.getElementById('levelOverlay');
+  State.dom.gameOverOverlay = document.getElementById('gameOverOverlay');
+  State.dom.victoryOverlay  = document.getElementById('victoryOverlay');
 
-  State.dom.startButton    = document.getElementById('startButton');
-  State.dom.levelStartButton = document.getElementById('levelStartButton');
-  State.dom.closeVictory   = document.getElementById('closeVictory');
-  State.dom.gameOverOk     = document.getElementById('gameOverOk');
+  State.dom.startButton       = document.getElementById('startButton');
+  State.dom.levelStartButton  = document.getElementById('levelStartButton');
+  State.dom.closeVictory      = document.getElementById('closeVictory');
+  State.dom.gameOverOk        = document.getElementById('gameOverOk');
 
   State.dom.levelTitle     = document.getElementById('levelTitle');
   State.dom.lostLevelText  = document.getElementById('lostLevelText');
-
   State.dom.scoreDisplay   = document.getElementById('scoreDisplay');
   State.dom.levelBadge     = document.getElementById('levelBadge');
   State.dom.livesContainer = document.getElementById('lives');
@@ -27,86 +26,99 @@ export function initUI(){
   renderLives();
 }
 
-export function updateHUD(){
+// === HUD ===
+export function updateHUD() {
   State.dom.scoreDisplay.textContent = `Очки: ${State.score}`;
   State.dom.levelBadge.textContent   = `Уровень: ${State.level}`;
   State.dom.levelTitle.textContent   = `Уровень ${State.level}`;
 }
 
-export function renderLives(){
+export function renderLives() {
   const c = State.dom.livesContainer;
   c.innerHTML = '';
-  for (let i=0;i<CONFIG.livesPerLevel;i++){
+  for (let i = 0; i < CONFIG.livesPerLevel; i++) {
     const h = document.createElement('span');
     h.className = 'heart' + (i < State.lives ? '' : ' lost');
     c.appendChild(h);
   }
 }
 
-export function show(el){ el.style.display = 'flex'; }
-export function hide(el){ el.style.display = 'none'; }
+// === Показ/скрытие ===
+export function show(el) { if (el) el.style.display = 'flex'; }
+export function hide(el) { if (el) el.style.display = 'none'; }
 
-export function showStartOverlay(){
-  if (State.dom.startOverlay) show(State.dom.startOverlay);
-}
+export function showLevelOverlay() { updateHUD(); renderLives(); show(State.dom.levelOverlay); }
+export function hideLevelOverlay() { hide(State.dom.levelOverlay); }
 
-export function hideStartOverlay(){
-  if (State.dom.startOverlay) hide(State.dom.startOverlay);
-}
-
-export function showLevelOverlay(){ updateHUD(); renderLives(); show(State.dom.levelOverlay); }
-export function hideLevelOverlay(){ hide(State.dom.levelOverlay); }
-
-export function showGameOver(level){
+export function showGameOver(level) {
   State.dom.lostLevelText.textContent = `Ты проиграл на уровне ${level}`;
   show(State.dom.gameOverOverlay);
 }
-export function hideGameOver(){ hide(State.dom.gameOverOverlay); }
+export function hideGameOver() { hide(State.dom.gameOverOverlay); }
 
-export function showVictory(){ show(State.dom.victoryOverlay); }
-export function hideVictory(){ hide(State.dom.victoryOverlay); }
+export function showVictory() { show(State.dom.victoryOverlay); }
+export function hideVictory() { hide(State.dom.victoryOverlay); }
 
-export function shakeCanvas(){
+export function shakeCanvas() {
   State.canvas.classList.remove('shake');
-  // перезапуск анимации
-  void State.canvas.offsetWidth;
+  void State.canvas.offsetWidth; // перезапуск анимации
   State.canvas.classList.add('shake');
 }
 
-/* Рендер лабиринта / игрока / финиша */
-export function redraw(){
+// === Изображения ===
+const heroImg = new Image();
+heroImg.src = 'assets/hero.png';
+const portalImg = new Image();
+portalImg.src = 'assets/portal.png';
+
+// === Отрисовка лабиринта ===
+export function redraw() {
+  if (!State.maze || !Array.isArray(State.maze) || !State.maze[0]) return;
+
   const { ctx } = State;
   const { rows, cols, cellSize } = CONFIG;
-  ctx.clearRect(0,0,State.canvas.width, State.canvas.height);
+  ctx.clearRect(0, 0, State.canvas.width, State.canvas.height);
 
   ctx.strokeStyle = '#333';
   ctx.lineWidth = 2;
 
-  for (let i=0;i<rows;i++){
-    for (let j=0;j<cols;j++){
+  // Рисуем стены лабиринта
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
       const cell = State.maze[i][j];
-      const x = j*cellSize, y = i*cellSize;
-      if (cell.walls.top){    line(x,y, x+cellSize,y); }
-      if (cell.walls.right){  line(x+cellSize,y, x+cellSize,y+cellSize); }
-      if (cell.walls.bottom){ line(x+cellSize,y+cellSize, x,y+cellSize); }
-      if (cell.walls.left){   line(x,y+cellSize, x,y); }
+      const x = j * cellSize, y = i * cellSize;
+      if (cell.walls.top)    line(x, y, x + cellSize, y);
+      if (cell.walls.right)  line(x + cellSize, y, x + cellSize, y + cellSize);
+      if (cell.walls.bottom) line(x + cellSize, y + cellSize, x, y + cellSize);
+      if (cell.walls.left)   line(x, y + cellSize, x, y);
     }
   }
 
-  // финиш
-  ctx.fillStyle = '#ff3b30';
-  drawBox(cols-1, rows-1, 0.2);
+  // === Портал (финиш) ===
+  const pad = cellSize * 0.1;
+  const finishX = (cols - 1) * cellSize + pad;
+  const finishY = (rows - 1) * cellSize + pad;
+  const size = cellSize - pad * 2;
+  ctx.save();
+  ctx.shadowColor = '#00ffff';
+  ctx.shadowBlur = 12;
+  if (portalImg.complete) ctx.drawImage(portalImg, finishX, finishY, size, size);
+  ctx.restore();
 
-  // игрок
-  ctx.fillStyle = '#1e90ff';
-  drawBox(State.playerCol, State.playerRow, 0.2);
+  // === Герой ===
+  const playerX = State.playerCol * cellSize + pad;
+  const playerY = State.playerRow * cellSize + pad;
+  ctx.save();
+  ctx.shadowColor = '#00e6ff';
+  ctx.shadowBlur = 6;
+  if (heroImg.complete) ctx.drawImage(heroImg, playerX, playerY, size, size);
+  ctx.restore();
 
-  function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
-  function drawBox(col,row,padRatio){
-    const pad = cellSize * padRatio;
-    const x = col*cellSize + pad;
-    const y = row*cellSize + pad;
-    const size = cellSize - 2*pad;
-    ctx.fillRect(x,y,size,size);
+  // Вспомогательные функции
+  function line(x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
   }
 }

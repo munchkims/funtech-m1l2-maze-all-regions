@@ -1,23 +1,24 @@
-import { initUI, showStartOverlay } from './ui.js';
+import { initUI } from './ui.js';
 import { newGame, beginPlay, retrySameLevel, closeVictoryAndBackToMenu } from './game.js';
 import { attachInput } from './input.js';
+import { State, CONFIG } from './state.js';
+import { redraw } from './ui.js';
 
-window.addEventListener('load', ()=>{
+// === Запуск при загрузке страницы ===
+window.addEventListener('load', () => {
   initUI();
   attachInput();
 
-  // 🔹 сразу запускаем первый уровень
+  // 🔹 Сразу запускаем первый уровень без стартового окна
   newGame();
 
   // Кнопки
-  document.getElementById('levelStartButton').addEventListener('click', ()=> beginPlay());
-  document.getElementById('gameOverOk').addEventListener('click', ()=> retrySameLevel());
-  document.getElementById('closeVictory').addEventListener('click', ()=> closeVictoryAndBackToMenu());
+  document.getElementById('levelStartButton').addEventListener('click', () => beginPlay());
+  document.getElementById('gameOverOk').addEventListener('click', () => retrySameLevel());
+  document.getElementById('closeVictory').addEventListener('click', () => closeVictoryAndBackToMenu());
 });
 
 // === 🔹 Адаптация под iframe и изменение размера ===
-import { State, CONFIG } from './state.js';
-import { redraw } from './ui.js';
 
 // Обновление размеров canvas с сохранением пропорций
 function resizeCanvas() {
@@ -35,8 +36,14 @@ function resizeCanvas() {
   State.canvas.height = mazeH * scale;
   State.ctx.setTransform(scale, 0, 0, scale, 0, 0);
 
-  // ✅ Добавляем проверку, чтобы не вызвать redraw раньше времени
+  // ✅ Проверяем, чтобы не вызвать redraw раньше времени
   if (State.maze) {
     redraw();
   }
 }
+
+// слушаем изменение окна
+window.addEventListener('resize', resizeCanvas);
+
+// вызываем при первом запуске
+setTimeout(resizeCanvas, 100);

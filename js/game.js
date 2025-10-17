@@ -1,19 +1,22 @@
 import { State, CONFIG } from './state.js';
 import { generateMaze } from './maze.js';
 import { Sounds } from './sound.js';
-import { redraw, updateHUD, renderLives, shakeCanvas,
-         showLevelOverlay, hideLevelOverlay,
-         showVictory, hideVictory,
-         showStartOverlay, hideStartOverlay,
-         showGameOver, hideGameOver } from './ui.js';
+import {
+  redraw, updateHUD, renderLives, shakeCanvas,
+  showLevelOverlay, hideLevelOverlay,
+  showVictory, hideVictory,
+  showGameOver, hideGameOver
+} from './ui.js';
 
-export function newGame(){
+// === Новая игра ===
+export function newGame() {
   State.level = 1;
   State.score = 0;
   startLevel(true);
 }
 
-export function startLevel(fromStartOverlay=false){
+// === Запуск уровня ===
+export function startLevel(fromStartOverlay = false) {
   // при старте уровня всегда 3 жизни
   State.lives = CONFIG.livesPerLevel;
   State.playerRow = 0;
@@ -23,76 +26,82 @@ export function startLevel(fromStartOverlay=false){
   renderLives();
   redraw();
 
-  // Если пришли с главного меню — сразу открываем старт уровня
-  if (fromStartOverlay) {
-    hideStartOverlay();
-  }
+  // Показываем старт уровня (без стартового экрана)
   showLevelOverlay();
 }
 
-export function beginPlay(){
+// === Начало игры ===
+export function beginPlay() {
   hideLevelOverlay();
   State.gameActive = true;
 }
 
-export function onMoveKey(code){
+// === Управление движением ===
+export function onMoveKey(code) {
   if (!State.gameActive) return;
 
   const cell = State.maze[State.playerRow][State.playerCol];
   let moved = false;
 
-  if (code === 32){ // Space → right
-    if (!cell.walls.right && State.playerCol < CONFIG.cols - 1){
+  if (code === 32) { // Space → вправо
+    if (!cell.walls.right && State.playerCol < CONFIG.cols - 1) {
       State.playerCol++; moved = true;
     } else { wrongMove(); return; }
   }
-  else if (code === 8){ // Backspace → left
-    if (!cell.walls.left && State.playerCol > 0){
+  else if (code === 8) { // Backspace → влево
+    if (!cell.walls.left && State.playerCol > 0) {
       State.playerCol--; moved = true;
     } else { wrongMove(); return; }
   }
-  else if (code === 13){ // Enter → down
-    if (!cell.walls.bottom && State.playerRow < CONFIG.rows - 1){
+  else if (code === 13) { // Enter → вниз
+    if (!cell.walls.bottom && State.playerRow < CONFIG.rows - 1) {
       State.playerRow++; moved = true;
     } else { wrongMove(); return; }
   }
 
-  if (moved){
+  if (moved) {
     Sounds.step();
     redraw();
     checkFinish();
   }
 }
 
-function wrongMove(){
+// === Ошибочный ход ===
+function wrongMove() {
   Sounds.hit();
-  if (State.lives > 0){
+  if (State.lives > 0) {
     State.lives--;
     renderLives();
     shakeCanvas();
     if (State.lives === 0) Sounds.lifeLost();
   }
-  if (State.lives === 0){
+  if (State.lives === 0) {
     State.gameActive = false;
     showGameOver(State.level);
   }
 }
 
-export function retrySameLevel(){
+// === Повтор уровня ===
+export function retrySameLevel() {
   hideGameOver();
   // заново стартуем тот же уровень со свежими 3 жизнями
-  startLevel(false); // не из главного меню
+  startLevel(false);
 }
 
-function checkFinish(){
-  const atFinish = (State.playerRow === CONFIG.rows - 1 && State.playerCol === CONFIG.cols - 1);
+// === Проверка финиша ===
+function checkFinish() {
+  const atFinish = (
+    State.playerRow === CONFIG.rows - 1 &&
+    State.playerCol === CONFIG.cols - 1
+  );
   if (!atFinish) return;
 
   Sounds.levelWin();
   State.score++;
   updateHUD();
 
-  if (State.score >= CONFIG.maxScoreToWin){
+  // Финальная победа
+  if (State.score >= CONFIG.maxScoreToWin) {
     State.gameActive = false;
     Sounds.gameWin();
     showVictory();
@@ -105,10 +114,9 @@ function checkFinish(){
   startLevel(false);
 }
 
-export function closeVictoryAndBackToMenu(){
+// === После победы возвращаемся к 1 уровню ===
+export function closeVictoryAndBackToMenu() {
   hideVictory();
-
-  // 🔹 Запускаем новую игру с первого уровня
   State.level = 1;
   State.score = 0;
   startLevel(true);
