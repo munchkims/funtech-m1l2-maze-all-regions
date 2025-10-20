@@ -28,9 +28,9 @@ export function initUI() {
 
 // === HUD ===
 export function updateHUD() {
-  State.dom.scoreDisplay.textContent = `Очки: ${State.score}`;
-  State.dom.levelBadge.textContent   = `Уровень: ${State.level}`;
-  State.dom.levelTitle.textContent   = `Уровень ${State.level}`;
+  State.dom.scoreDisplay.textContent = `Score: ${State.score}`;
+  State.dom.levelBadge.textContent   = `Level: ${State.level}`;
+  State.dom.levelTitle.textContent   = `Level ${State.level}`;
 }
 
 export function renderLives() {
@@ -51,7 +51,7 @@ export function showLevelOverlay() { updateHUD(); renderLives(); show(State.dom.
 export function hideLevelOverlay() { hide(State.dom.levelOverlay); }
 
 export function showGameOver(level) {
-  State.dom.lostLevelText.textContent = `Ты проиграл на уровне ${level}`;
+  State.dom.lostLevelText.textContent = `You lost on level ${level}`;
   show(State.dom.gameOverOverlay);
 }
 export function hideGameOver() { hide(State.dom.gameOverOverlay); }
